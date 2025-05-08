@@ -13,12 +13,17 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # ---------- PostgreSQL ---------- #
 try:
     connection_pool = pool.SimpleConnectionPool(
         1, 20,
-        "postgresql://neondb_owner:npg_U7qWy5IHYgQn@ep-proud-dust-a4v4yjro-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+        os.getenv('DATABASE_URL')
     )
     
     # Create users table if it doesn't exist
@@ -62,7 +67,7 @@ def send_email_confirmation(email, otp):
     try:
         subject = 'Your OTP for Signup'
         message = f'Your OTP for signup is: {otp}'
-        from_email = settings.EMAIL_HOST_USER
+        from_email = os.getenv('EMAIL_HOST_USER')
         recipient_list = [email]
         send_mail(subject, message, from_email, recipient_list)
         return True
