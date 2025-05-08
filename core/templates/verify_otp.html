@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify OTP - Phish Detector{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-shield-alt me-2"></i>Verify OTP
+                </h2>
+                
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <div>{{ error }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                {% if message %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+
+                <form method="POST" id="otpForm">
+                    {% csrf_token %}
+                    
+                    {% if otp_sent %}
+                    <div class="mb-4">
+                        <label for="otp" class="form-label">Enter OTP</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-key"></i>
+                            </span>
+                            <input type="text" class="form-control {% if error %}is-invalid{% endif %}" 
+                                   id="otp" name="otp" 
+                                   placeholder="Enter the 6-digit code"
+                                   pattern="[0-9]{6}" maxlength="6">
+                        </div>
+                        <div class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Enter the 6-digit code sent to your email
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="verifyBtn">
+                            <i class="fas fa-check me-2"></i>Verify OTP
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    {% if resend_available %}
+                    <div class="d-grid mt-3">
+                        <button type="submit" name="resend" value="1" class="btn btn-outline-primary" id="resendBtn">
+                            <i class="fas fa-redo me-2"></i>Resend OTP ({{ max_resends|add:"-resend_count" }} left)
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .input-group .form-control:focus {
+        border-left: none;
+        box-shadow: none;
+    }
+
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        border-radius: 5px;
+    }
+
+    .input-group:focus-within .input-group-text,
+    .input-group:focus-within .form-control {
+        border-color: var(--secondary-color);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('otpForm');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const otpInput = document.getElementById('otp');
+
+    if (verifyBtn) {
+        verifyBtn.addEventListener('click', function(e) {
+            if (!otpInput.value.trim()) {
+                e.preventDefault();
+                alert('Please enter the OTP to verify.');
+            }
+        });
+    }
+
+    if (resendBtn) {
+        resendBtn.addEventListener('click', function(e) {
+            // Remove required validation when resending
+            otpInput.removeAttribute('required');
+        });
+    }
+});
+</script>
+{% endblock %}
+  
